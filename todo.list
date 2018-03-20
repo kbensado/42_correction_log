@@ -1,5 +1,6 @@
 si "status" is "finished" && "validated" is "false" && "locked_at" > "2015" get "repo_url"
 
-
+created after 05/2015
 
 https://projects.intra.42.fr/projects/[name_project]/projects_users/[projects_user_id]
+

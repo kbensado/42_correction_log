@@ -8,15 +8,7 @@ import (
 	"bytes"
 	"net/http"
 	"encoding/json"
-	// "golang.org/x/net/context"
-	// "golang.org/x/oauth2/clientcredentials"
 )
-
-// type Creds1 struct {
-// 	UID string 
-// 	// SECRET string 
-// 	// WEBSITE string 
-// }
 
 type Creds struct {
 	UID string 
@@ -38,7 +30,7 @@ type Api struct {
 
 	// field to scrap from API
 	REPO_URL string `json:"repo_url`
-	// VALIDATED string `json:"validated`
+	VALIDATED string `json:"validated`
 
 }
 
@@ -70,7 +62,6 @@ type Loader struct {
 		fmt.Printf("exit@GetScope2 : %v\n", err)
 		return []byte(""), err
 	}
-	// fmt.Println(string(token));
 	return token, err
 }
 
@@ -100,12 +91,12 @@ func HandleLogin(l *Loader) {
 	token , err := GetTokensScope("https://api.intra.42.fr/oauth/token", l.c.UID, l.c.SECRET)
 	if err != nil {
 		fmt.Printf("exit@HandleLogin : %v\n", err)
-		os.Exit(2)
+		os.Exit(1)
 	}
 	err1 := json.Unmarshal([]byte(token),  &l.token)
 	if err1 != nil {
 		fmt.Printf("exit@HandleLogin1 : %v | %s\n", err1, token)
-		os.Exit(2)
+		os.Exit(1)
 	}
 	fmt.Println(l.token)
 }
@@ -117,33 +108,28 @@ func main () {
 	if (os.Args[1] == "-help") {
 		fmt.Println("./binary [file_cred.json] [API_call]\nFill file_cred with ur UID and SECRET")
 	}
-	// fmt.Printf("%s || %s\n", os.Args[1], os.Args[2])
 	file, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Printf("%s\n", file)
-	// var t Creds1
-	// json.Unmarshal(file, &t)
+	arg := os.Args[2]
 	json.Unmarshal(file, &l.c)
-	// fmt.Println(t.UID)
-	// i := 1
-	// if (i == 1) {
-	// 	os.Exit(9)
-	// }
-
-	fmt.Println(l.c.UID)
-	fmt.Println(l.c.SECRET)
-	fmt.Println(l.c.WEBSITE)
+	fmt.Printf("%s\n", l.c.WEBSITE + arg)
 	HandleLogin(&l)
-	req, _ := GetScope(l.c.WEBSITE + os.Args[2], &l, l.c.WEBSITE + os.Args[2])
-	fmt.Println(string(req))
-	err1 := json.Unmarshal(req, &l.req_api)
-	if err1 != nil {
-		fmt.Printf("exit@MAIN : %v | %s\n", err1)
-		os.Exit(5)
-	}
-	fmt.Println(l.req_api.REPO_URL)
+	req, _ := GetScope(l.c.WEBSITE + arg, &l, l.c.WEBSITE + arg)
+	if (os.Args[3] != "") {
 
+		res_file, err_create := os.Create(os.Args[3])
+		defer res_file.Close()
+		if err_create != nil {
+
+			fmt.Printf("exit@CreateFile : %v\n", err_create)
+			os.Exit(1)		
+		}
+		res_file.Write(req)
+	} else {
+		fmt.Println(string(req))
+	}
+	return (0)
 }
